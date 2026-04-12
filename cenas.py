@@ -93,6 +93,11 @@ class CenaBatalha:
             self.desenhar(tela)
             resultado = self.update()
 
+            if resultado:
+                print("RESULTADO DA BATALHA:", resultado)
+                return resultado
+            resultado = self.update()
+
             
 
             pygame.display.flip()
@@ -140,68 +145,63 @@ class CenaBatalha:
         self.alvo_index = 0        
             
     def update(self):
-        if self.turno == "inimigo":
-            dano = self.inimigo.ataque - self.jogador.defesa
-            if dano < 0:
-                dano = 0
 
-            self.alvo.receber_dano(dano)
-
-            self.tempo_acao += 1
-
-            if self.tempo_acao > 2:  # 1 segundo (60 FPS)
-                self.tempo_acao = 0
-
-                self.ataque_inimigos()
-
-                self.turno = "jogador"
-                
-            # jogador morreu
+ 
         if not self.jogador.esta_vivo():
-            return "fim"
+            return "DERROTA"
 
         if all(not i.esta_vivo() for i in self.inimigos):
-            return "fim"
-                                
-        #continuação da tentativa de animação
+            return "VITORIA"
+
+
+
         if self.animando:
             self.tempo_animacao += 1
 
-            # movimento simples (vai e volta)
+   
             if self.tempo_animacao < 10:
                 self.atacante.rect.x += 5
+
+            
             elif self.tempo_animacao < 20:
                 self.atacante.rect.x -= 5
-            if self.animando:
-                self.tempo_animacao += 1
 
-                if self.tempo_animacao > 20:
+        
+            else:
+                dano = self.atacante.ataque - self.alvo.defesa
+                if dano < 0:
+                    dano = 0
 
-                    dano = self.atacante.ataque - self.alvo.defesa
-                    if dano < 0:
-                        dano = 0
+                self.alvo.receber_dano(dano)
+                print(f"{self.atacante.nome} causou {dano}")
 
-                    self.alvo.receber_dano(dano)
+                self.animando = False
+                self.tempo_animacao = 0
 
-                    print(f"{self.atacante.nome} causou {dano}")
+    
+                if not self.jogador.esta_vivo():
+                    return "DERROTA"
 
-                    self.animando = False
-                    self.proximo_turno()
-                    
-            elif self.personagem_atual in self.inimigos:
-                vivos = [a for a in self.aliados if a.esta_vivo()]
+                if all(not i.esta_vivo() for i in self.inimigos):
+                    return "VITORIA"
 
-                if vivos:
-                    alvo = vivos[0]
-                    self.atacar(self.personagem_atual, alvo)
-                    
-                
-        #animação inimigos
-        if not self.animando and self.personagem_atual in self.inimigos:
-            pygame.time.delay(500)
+                self.proximo_turno()
 
-            alvo = self.aliados[0]
-            self.atacar(self.personagem_atual, alvo)
+            return None  
+
+        if self.personagem_atual in self.inimigos:
+            vivos = [a for a in self.aliados if a.esta_vivo()]
+
+            if vivos:
+                alvo = vivos[0]
+                self.atacar(self.personagem_atual, alvo)
+
+            return None
+
+
+  
+        return None
+       
     
     def desenhar_barra_vida(self, tela, personagem, x, y):
         largura_total = 170
@@ -329,63 +329,53 @@ class CenaFinal:
         self.time_aliado = time_aliado
         self.fonte_titulo = pygame.font.SysFont("Arial", 60)
         self.fonte_texto = pygame.font.SysFont("Arial", 24)
-        
-        
 
-    def resetar_time(self):
-        for p in self.time_aliado:
-            p.vida = p.vida_max
-    
-    def loop(self, event):
+    def loop(self, tela):
+        clock = pygame.time.Clock()
 
-        if self.jogador.vida < 0:
-            print("VOCÊ PERDEU")
-            return "DERROTA"
+        while True:
+            clock.tick(60)
 
-        # todos inimigos mortos
-        if self.inimigo.vida < 0:
-            print("VOCÊ VENCEU")
-            return "VITORIA"
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
 
-  
-        if event.type == pygame.KEYDOWN:
-            
-            # Sair
-            if event.key == pygame.K_s:
-                pygame.quit()
-                sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    
+                    if event.key == pygame.K_s:
+                        return "sair"
 
-            # Reiniciar batalha
-            if event.key == pygame.K_r:
-                self.resetar_time()
-                self.game.mudar_cena(CenaBatalha(self.game, self.time_aliado))
+                    if event.key == pygame.K_r:
+                        return "batalha"
 
-            # Voltar ao menu (seleção)
-            if event.key == pygame.K_m:
-                return "selecao"
+                    if event.key == pygame.K_m:
+                        return "menu"
 
+            self.draw(tela)
+            pygame.display.flip()
 
-    def draw(self, tela: pygame.Surface):
-        tela.fill(PRETO)
+    def draw(self, tela):
+        tela.fill((0,0,0))
 
         if self.resultado == "VITORIA":
-            cor = VERDE
+            cor = (0,255,0)
             titulo = "VOCÊ VENCEU"
         else:
-            cor = VERMELHO
-            titulo = "VOCÊ FOI DERROTADO"
+            cor = (255,0,0)
+            titulo = "VOCÊ PERDEU"
 
         txt_titulo = self.fonte_titulo.render(titulo, True, cor)
-        tela.blit(txt_titulo, txt_titulo.get_rect(center=(LARGURA//2, ALTURA//2 - 120)))
+        tela.blit(txt_titulo, txt_titulo.get_rect(center=(LARGURA//2, ALTURA//2 - 100)))
 
         instrucoes = [
             "S - Sair",
             "R - Reiniciar",
             "M - Menu"
         ]
-        y = ALTURA//2 + 10
+
+        y = ALTURA//2
         for linha in instrucoes:
-            txt = self.fonte_texto.render(linha, True, BRANCO)
+            txt = self.fonte_texto.render(linha, True, (255,255,255))
             tela.blit(txt, txt.get_rect(center=(LARGURA//2, y)))
             y += 40
-
