@@ -1,5 +1,5 @@
 import pygame
-#lohgfsojnpfhdn
+
 import sys
 from constants import *
 import menu
@@ -27,7 +27,7 @@ class Game:
         self.cena_atual = 1
         self.personagem_escolhido = None
 
-    # essa função muda de cenas, mas ainda não temos nenhuma :(
+
     def mudar_cena(self, nova_cena):
         self.cena_atual = nova_cena
 
@@ -35,13 +35,13 @@ class Game:
         while True:
             self.clock.tick(FPS)
 
-            # lidamos com eventos Globais (Fechar jogo)
+          
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
-            # atualização e desenho da cena atual
+       
             self.cena_atual.update()
             self.cena_atual.draw(self.janela)
 
@@ -50,31 +50,52 @@ class Game:
 game = Game()
 
 
+estado = "menu"
+resultado_batalha = None
+
 while rodando:
     print("estado atual:", estado)
 
+  
     if estado == "menu":
         resultado = menu.loop(tela)
 
+        if resultado == "sair":
+            rodando = False
+        else:
+            estado = resultado
+
+
+
     elif estado == "selecao":
-        resultado = Selecionar.loop(tela,game)
-        print("voltou da seleção com:", resultado)
-        
+        resultado = Selecionar.loop(tela, game)
+
+        if resultado == "menu":
+            estado = "menu"
+        else:
+            estado = "batalha"
+
+
+
     elif estado == "batalha":
         cena = CenaBatalha(game)
-        estado = cena.loop(tela)   
-        
-    elif estado == "fim":
-        cena = CenaFinal(game)
-        estado = CenaFinal.loop()
-    
-    
-    if resultado == "sair":
-        rodando = False
-        
-    else:
-        estado = resultado
+        resultado = cena.loop(tela)
 
-pygame.quit()
+        if resultado in ["VITORIA", "DERROTA"]:
+            resultado_batalha = resultado
+            estado = "final"
+        else:
+            estado = resultado
 
-# executamos o jogo
+
+
+    elif estado == "final":
+        cena = CenaFinal(game, resultado_batalha, [game.personagem_escolhido])
+        resultado = cena.loop(tela)
+
+        if resultado == "menu":
+            estado = "menu"
+        elif resultado == "batalha":
+            estado = "batalha"
+        elif resultado == "sair":
+            rodando = False
