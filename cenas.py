@@ -20,14 +20,14 @@ class CenaBatalha:
         # cria inimigo
         self.inimigos = []
 
-        self.inimigo1 = Personagem("Capanga 1", 100, 6, 4, 350, 90, img_reduzida_1)
+        self.inimigo1 = Personagem("Capanga 1", 100, 6, 4, 410, 30, img_reduzida_1)
 
-        self.inimigo2 = Personagem("Capanga 2", 120, 5, 4, 350, 280, img_reduzida_1)
+        self.inimigo2 = Personagem("Capanga 2", 120, 5, 4, 410, 300, img_reduzida_1)
 
-        self.inimigo = Personagem("Chefe", 100, 10, 5, 450, 190, img_reduzida_3)
+        self.inimigo = Personagem("Chefe", 100, 10, 5, 350, 180, img_reduzida_3)
         
-        self.inimigos.append(self.inimigo)
         self.inimigos.append(self.inimigo1)
+        self.inimigos.append(self.inimigo)
         self.inimigos.append(self.inimigo2)
 
         # posiciona jogador
@@ -273,14 +273,14 @@ class CenaBatalha:
         for i, inimigo in enumerate(self.inimigos):
             if inimigo.vida > 0:
                 inimigo.desenhar(tela)
-                self.desenhar_barra_vida_inimiga(tela, inimigo, 400, 50 + i*40)
+                self.desenhar_barra_vida_inimiga(tela, inimigo, 400, 50 + i*135)
                 
                 x = self.inimigo.rect.centerx - 300
                 y = self.inimigo.rect.top - 5
                 
                 fonte_pequena = pygame.font.SysFont("Arial", 18)
                 texto_vida = fonte_pequena.render(f"{inimigo.vida}/{inimigo.vida_max}",True,(255, 255, 255))
-                tela.blit(texto_vida, (x, y - 5))
+                tela.blit(texto_vida, (323, 50 + i*120))
                 
         #seleção de inimigo
         for i, inimigo in enumerate(self.inimigos):
