@@ -70,7 +70,7 @@ def loop(tela):
                             return "sair"
 
                 tela.blit(render, (x, y))
-                print("estou no menu")
+                
 
         # ---------------- TELA DE OPÇÕES ----------------
         else:
