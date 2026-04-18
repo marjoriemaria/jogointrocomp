@@ -41,6 +41,7 @@ class Selecionar:
 
                         if evento.key == pygame.K_RIGHT:
                             selecionado = (selecionado + 1) % len(personagens)
+                            
 
                         if evento.key == pygame.K_LEFT:
                             selecionado = (selecionado - 1) % len(personagens)
@@ -62,20 +63,23 @@ class Selecionar:
                         if evento.key == pygame.K_ESCAPE:
                             return "menu"
             # seleção
+            personagens[0].set_posicao(200,250)
+            personagens[1].set_posicao(450,250)
             if not confirmado:
+                
                 fonte = pygame.font.SysFont("Arial", 50)
                 texto = fonte.render("Escolha um personagem", True, (255, 255, 255))
                 tela.blit(texto, (115, 100))
-                print("estou decidindo")
+                
 
                 for i, p in enumerate(personagens):
+                    
                     rect = p.rect
 
                     if rect.collidepoint(mouse_pos):
                         selecionado = i
 
                         if mouse_click: 
-                            estado = None
                             if not confirmado:
                                 escolhido = p
                                 game.personagem_escolhido = p
