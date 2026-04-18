@@ -1,84 +1,101 @@
-
 import pygame
+
+import sys
 from constants import *
+import menu
+from selecionar import *
+from cenas import *
 
-class Personagem(pygame.sprite.Sprite):
-    def __init__(self, nome, vida, ataque, defesa, x, y, imagem):
-        super().__init__()
-        
-        self.nome = nome
-        self.vida = vida
-        self.vida_max = vida
-        self.ataque = ataque
-        self.defesa = defesa
-        self.image = imagem
-        self.rect = self.image.get_rect(topleft=(x, y))
+pygame.init()
 
-    def desenhar(self, tela, selecionado=False):
-        tela.blit(self.image, self.rect)
+tela = pygame.display.set_mode((LARGURA, ALTURA))
+pygame.display.set_caption("Jogo de Batalha")
 
-        if selecionado:
-            pygame.draw.rect(tela, (255,255,0), self.rect, 5)
+estado = "menu"
+rodando = True
+
+# música e sons
+pygame.mixer.music.load("sons/trilha.mp3")
+pygame.mixer.music.set_volume(0.01) 
+pygame.mixer.music.play()
+
+
+
+class Game:
+    def __init__(self):
+        self.clock = pygame.time.Clock()
+        self.cena_atual = 1
+        self.personagem_escolhido = None
+
+
+    def mudar_cena(self, nova_cena):
+        self.cena_atual = nova_cena
+
+    def run(self):
+        while True:
+            self.clock.tick(FPS)
+
+          
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+       
+            self.cena_atual.update()
+            self.cena_atual.draw(self.janela)
+
+            pygame.display.update()
+            
+game = Game()
+
+
+estado = "menu"
+resultado_batalha = None
+
+while rodando:
     
 
-    # trocar a posição do personagem
-    def set_posicao(self, x, y):
-        self.rect.center = (x, y)
+  
+    if estado == "menu":
+        resultado = menu.loop(tela)
 
-    # fazer ele causar dano a um oponente
-    def causar_dano(self, oponente):
-        dano = self.ataque - oponente.defesa
-        # causa dano apenas se ele foi maior que 0
-        if dano > 0:
-            oponente.receber_dano(dano)
-            return dano # retorna o dano causado (informação útil depois)
+        if resultado == "sair":
+            rodando = False
         else:
-            return 0
+            estado = resultado
 
-    # fazer ele receber dano
-    def receber_dano(self, dano):
-        self.vida -= dano
-        if self.vida < 0: # garante que a vida não pode ser negativa
-            self.vida = 0
 
-    # verifica se um personagem está vivo
-    def esta_vivo(self):
-        return self.vida > 0
-    
-    def desenhar_barra_vida(self, tela, personagem, x, y):
-        largura_total = 170
-        altura = 20
 
-        proporcao = personagem.vida / personagem.vida_max
-        largura_atual = int(largura_total * proporcao)
+    elif estado == "selecao":
+        resultado = Selecionar.loop(tela, game)
 
-        # fundo (vermelho)
-        pygame.draw.rect(tela, (235, 0, 0), (x, y, largura_total, altura))
+        if resultado == "menu":
+            estado = "menu"
+        else:
+            estado = "batalha"
 
-        # vida atual (verde)
-        pygame.draw.rect(tela, (0, 230, 0), (x, y, largura_atual, altura))
-        
-    def desenhar_barra_vida_inimiga(self, tela, personagem, x, y):
-        largura_total = 100
-        altura = 15
 
-        proporcao = personagem.vida / personagem.vida_max
-        largura_atual = int(largura_total * proporcao)
 
-        # fundo
-        pygame.draw.rect(tela, (255, 0, 0), (x, y, largura_total, altura))
+    elif estado == "batalha":
+        cena = CenaBatalha(game)
+        resultado = cena.loop(tela)
 
-        # vida atual
-        pygame.draw.rect(tela, (0, 255, 0), (x, y, largura_atual, altura))
-   
-personagens = [
-            Personagem("Personagem 1", 200, 150, 5, 160, 160, pygame.image.load("imagens/personagem 1.png")),
-            Personagem("Personagem 2", 200, 50, 5, 380, 160, pygame.image.load("imagens/personagem 2.png"))
-        ]
+        if resultado in ["VITORIA", "DERROTA"]:
+            resultado_batalha = resultado
+            estado = "final"
+        else:
+            estado = resultado
 
-#imagens reduzidas dos inimigos
-img_inimigo1 = pygame.image.load("imagens/gato filhote.png")
-img_inimigo3 = pygame.image.load("imagens/gato vilao.png")
 
-img_reduzida_1 = pygame.transform.scale(img_inimigo1, (LARGURA//3, ALTURA//3))
-img_reduzida_3= pygame.transform.scale(img_inimigo3, (LARGURA//3, ALTURA//3))
+
+    elif estado == "final":
+        cena = CenaFinal(game, resultado_batalha, [game.personagem_escolhido])
+        resultado = cena.loop(tela)
+
+        if resultado == "menu":
+            estado = "menu"
+        elif resultado == "batalha":
+            estado = "batalha"
+        elif resultado == "sair":
+            rodando = False
