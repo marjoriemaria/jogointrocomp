@@ -44,6 +44,32 @@ class Personagem(pygame.sprite.Sprite):
     # verifica se um personagem está vivo
     def esta_vivo(self):
         return self.vida > 0
+    
+    def desenhar_barra_vida(self, tela, personagem, x, y):
+        largura_total = 170
+        altura = 20
+
+        proporcao = personagem.vida / personagem.vida_max
+        largura_atual = int(largura_total * proporcao)
+
+        # fundo (vermelho)
+        pygame.draw.rect(tela, (235, 0, 0), (x, y, largura_total, altura))
+
+        # vida atual (verde)
+        pygame.draw.rect(tela, (0, 230, 0), (x, y, largura_atual, altura))
+        
+    def desenhar_barra_vida_inimiga(self, tela, personagem, x, y):
+        largura_total = 100
+        altura = 15
+
+        proporcao = personagem.vida / personagem.vida_max
+        largura_atual = int(largura_total * proporcao)
+
+        # fundo
+        pygame.draw.rect(tela, (255, 0, 0), (x, y, largura_total, altura))
+
+        # vida atual
+        pygame.draw.rect(tela, (0, 255, 0), (x, y, largura_atual, altura))
    
 personagens = [
             Personagem("Personagem 1", 200, 150, 5, 160, 160, pygame.image.load("imagens/personagem 1.png")),
