@@ -65,7 +65,7 @@ class Personagem(pygame.sprite.Sprite):
 # personagens jogáveis
 personagens = [
     Personagem("Personagem 1", 200, 150, 5, 10, 160, 160, pygame.image.load("imagens/personagem 1.png")),
-    Personagem("Personagem 2", 200, 50, 5, 8, 380, 160, pygame.image.load("imagens/personagem 2.png"))
+    Personagem("Personagem 2", 200, 150, 5, 8, 380, 160, pygame.image.load("imagens/personagem 2.png"))
 ]
 
 # inimigos
