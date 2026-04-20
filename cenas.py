@@ -231,7 +231,8 @@ class CenaBatalha:
         
     def desenhar(self, tela):
         
-        tela.fill((20, 20, 20))
+        
+        tela.blit(pygame.image.load("imagens/Fundo batalha.png"), (0, 0))
 
         # desenha jogador
         if self.jogador:
