@@ -90,12 +90,16 @@ while rodando:
 
 
     elif estado == "final":
-        cena = CenaFinal(game, resultado_batalha, [game.personagem_escolhido])
+        personagens = [game.personagem_escolhido] if game.personagem_escolhido else []
+        cena = CenaFinal(game, resultado_batalha, personagens)
+
         resultado = cena.loop(tela)
 
-        if resultado == "menu":
-            estado = "menu"
-        elif resultado == "batalha":
-            estado = "batalha"
-        elif resultado == "sair":
-            rodando = False
+    if resultado == "menu":
+        estado = "menu"
+    elif resultado == "batalha":
+        estado = "batalha"
+    elif resultado == "sair":
+        rodando = False
+
+        
