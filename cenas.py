@@ -20,7 +20,7 @@ class CenaBatalha:
 
         self.inimigo1 = Personagem("Capanga 1", 100, 10, 4, 10, 410, 30, img_reduzida_1)
         self.inimigo2 = Personagem("Capanga 2", 120, 10, 4, 10, 410, 300, img_reduzida_1)
-        self.inimigo = Personagem("Chefe", 100, 15, 5, 10, 350, 180, img_reduzida_3)
+        self.inimigo = Personagem("Chefe", 150, 15, 5, 10, 350, 180, img_reduzida_3)
         
         self.inimigos.append(self.inimigo1)
         self.inimigos.append(self.inimigo)
