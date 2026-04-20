@@ -1,21 +1,22 @@
 def calcular_dano(atacante, alvo):
-    dano = atacante.ataque - alvo.defesa
-    if dano < 0:
-        dano = 0
-    return dano
+    dano = atacante.ataque * (50 / (50 + alvo.defesa))
+    return max(1, int(dano))
 
 
 def aplicar_dano(atacante, alvo):
     dano = calcular_dano(atacante, alvo)
-    alvo.vida -= dano
+    alvo.receber_dano(dano)
     return dano
 
 
 def verificar_vitoria(aliados, inimigos):
-    if all(not i.esta_vivo() for i in inimigos):
+    aliados_vivos = [a for a in aliados if a.esta_vivo()]
+    inimigos_vivos = [i for i in inimigos if i.esta_vivo()]
+
+    if not inimigos_vivos:
         return "VITORIA"
     
-    if all(not a.esta_vivo() for a in aliados):
+    if not aliados_vivos:
         return "DERROTA"
     
     return None
