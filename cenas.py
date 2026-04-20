@@ -1,5 +1,6 @@
 import pygame
 from constants import *
+from logica import *
 import random
 from personagem import *
 from selecionar import *
@@ -168,22 +169,16 @@ class CenaBatalha:
 
         
             else:
-                dano = self.atacante.ataque - self.alvo.defesa
-                if dano < 0:
-                    dano = 0
-
-                self.alvo.receber_dano(dano)
+                dano = aplicar_dano(self.atacante, self.alvo)
                 print(f"{self.atacante.nome} causou {dano}")
-
+            
                 self.animando = False
                 self.tempo_animacao = 0
 
     
-                if not self.jogador.esta_vivo():
-                    return "DERROTA"
-
-                if all(not i.esta_vivo() for i in self.inimigos):
-                    return "VITORIA"
+                resultado = verificar_vitoria(self.aliados, self.inimigos)
+                if resultado:
+                    return resultado
 
                 self.proximo_turno()
 
