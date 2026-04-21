@@ -42,7 +42,7 @@ def loop(tela):
                             return "selecao"
                         elif opcoes[selecionado] == "Opções":
                             em_opcoes = True
-                        elif opcoes[selecionado] == "creditos":
+                        elif opcoes[selecionado] == "Créditos":
                             em_creditos = True
                         elif opcoes[selecionado] == "Sair":
                             return "sair"
