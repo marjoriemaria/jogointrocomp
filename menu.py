@@ -2,7 +2,7 @@ import pygame
 from constants import *
 
 def loop(tela):
-    opcoes = ["Jogar", "Opções", "Creditos", "Sair"]
+    opcoes = ["Jogar", "Opções", "Créditos", "Sair"]
     selecionado = 0
     em_opcoes = False
     em_creditos = False
