@@ -27,8 +27,7 @@ class Personagem(pygame.sprite.Sprite):
         if selecionado:
             pygame.draw.rect(tela, (255,255,0), self.rect, 5)
 
-        if self.defendendo:
-            pygame.draw.circle(tela, (0, 0, 255), self.rect.center, 40, 2)
+        
 
     def set_posicao(self, x, y):
         self.rect.center = (x, y)
@@ -60,7 +59,9 @@ class Personagem(pygame.sprite.Sprite):
 
         pygame.draw.rect(tela, (255, 0, 0), (x, y, largura_total, altura))
         pygame.draw.rect(tela, (0, 255, 0), (x, y, largura_atual, altura))
-
+    def resetar(self):
+        self.vida = self.vida_max
+        self.defendendo = False
 
 # personagens jogáveis
 personagens = [
