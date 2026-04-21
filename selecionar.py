@@ -1,150 +1,142 @@
 import pygame
 from constants import *
-from personagem import *
 
-class Selecionar:
-    def loop(tela, game):
-        selecionado = 0
-        confirmado = False
-        escolhido = None
+def loop(tela):
+    opcoes = ["Jogar", "Opções", "Créditos", "Sair"]
+    selecionado = 0
+    em_opcoes = False
+    em_creditos = False
 
-        digitando_nome = False
-        nome_digitado = ""
-        cursor_visivel = True
-        tempo_cursor = 0
+    # ---------------- CARREGAR IMAGENS ----------------
+    fundo_menu = pygame.image.load("imagens/img.jpeg").convert()
+    fundo_selecao = pygame.image.load("imagens/Selecao.jpeg").convert()
 
-        while True:
-            mouse_pos = pygame.mouse.get_pos()
-            mouse_click = pygame.mouse.get_pressed()[0]
+    imagem_marjorie = pygame.image.load("imagens/Marjorie.png")
+    imagem_debora = pygame.image.load("imagens/Debora.png")
+    imagem_murilo = pygame.image.load("imagens/Murilo.png")
 
-            for evento in pygame.event.get():
-                if evento.type == pygame.QUIT:
-                    return "sair"
+    clock = pygame.time.Clock()
 
-                if evento.type == pygame.KEYDOWN:
+    while True:
+        clock.tick(60)
 
-                    # ---------------- TELA DE NOME ----------------
-                    if digitando_nome:
-                        if evento.key == pygame.K_BACKSPACE:
-                            nome_digitado = nome_digitado[:-1]
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_click = pygame.mouse.get_pressed()[0]
 
-                        elif evento.key == pygame.K_RETURN:
-                            if nome_digitado.strip() != "":
-                                escolhido.nome = nome_digitado
-                                return "batalha"
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                return "sair"
 
-                        else:
-                            if evento.unicode.isalnum() and len(nome_digitado) < 10:
-                                nome_digitado += evento.unicode
+            if evento.type == pygame.KEYDOWN:
 
-                        if evento.key == pygame.K_ESCAPE:
-                            return "menu"
+                # ---------------- MENU PRINCIPAL ----------------
+                if not em_opcoes and not em_creditos:
+                    if evento.key == pygame.K_DOWN:
+                        selecionado = (selecionado + 1) % len(opcoes)
 
-                        continue
+                    if evento.key == pygame.K_UP:
+                        selecionado = (selecionado - 1) % len(opcoes)
 
-                    # ---------------- SELEÇÃO ----------------
-                    if not confirmado:
+                    if evento.key == pygame.K_RETURN:
+                        if opcoes[selecionado] == "Jogar":
+                            return "selecao"
+                        elif opcoes[selecionado] == "Opções":
+                            em_opcoes = True
+                        elif opcoes[selecionado] == "creditos":
+                            em_creditos = True
+                        elif opcoes[selecionado] == "Sair":
+                            return "sair"
 
-                        if evento.key == pygame.K_RIGHT:
-                            selecionado = (selecionado + 1) % len(personagens)
+                # ---------------- TELAS SECUNDÁRIAS ----------------
+                else:
+                    if evento.key == pygame.K_ESCAPE:
+                        em_opcoes = False
+                        em_creditos = False
 
-                        if evento.key == pygame.K_LEFT:
-                            selecionado = (selecionado - 1) % len(personagens)
+        # ---------------- FUNDO ----------------
+        if not em_opcoes and not em_creditos:
+            tela.blit(fundo_menu, (0, 0))
+        else:
+            tela.blit(fundo_selecao, (0, 0))
 
-                        if evento.key == pygame.K_RETURN:
-                            escolhido = personagens[selecionado]
-                            game.personagem_escolhido = escolhido
-                            confirmado = True
+        # ---------------- MENU PRINCIPAL ----------------
+        if not em_opcoes and not em_creditos:
+            for i, texto in enumerate(opcoes):
+                cor = VERDE if i == selecionado else BRANCO
+                render = FONTEs.render(texto, True, cor)
 
-                        if evento.key == pygame.K_ESCAPE:
-                            return "menu"
+                x = 300
+                y = 120 + i * 60
 
-                    # ---------------- TELA PERSONAGEM ----------------
-                    else:
-                        if evento.key == pygame.K_RETURN:
-                            digitando_nome = True  # agora vai pra tela preta
+                rect = render.get_rect(topleft=(x, y))
 
-                        if evento.key == pygame.K_ESCAPE:
-                            return "menu"
+                if rect.collidepoint(mouse_pos):
+                    selecionado = i
 
-            personagens[0].set_posicao(200, 250)
-            personagens[1].set_posicao(450, 250)
+                    if mouse_click:
+                        if texto == "Jogar":
+                            return "selecao"
+                        elif texto == "Opções":
+                            em_opcoes = True
+                        elif texto == "Creditos":
+                            em_creditos = True
+                        elif texto == "Sair":
+                            return "sair"
 
-            # ---------------- TELA PRETA (NOME) ----------------
-            if digitando_nome:
-                tela.fill((0, 0, 0))
+                tela.blit(render, (x, y))
 
-                fonte = pygame.font.SysFont("Arial", 40)
-                texto = fonte.render("Digite seu nome", True, BRANCO)
-                tela.blit(texto, (200, 100))
+        # ---------------- TELA DE OPÇÕES ----------------
+        elif em_opcoes:
+            fonte_op = pygame.font.SysFont("Arial", 25)
 
-                rect_caixa = pygame.Rect(200, 180, 280, 40)
-                pygame.draw.rect(tela, BRANCO, rect_caixa)
-                pygame.draw.rect(tela, CINZA, rect_caixa, 2)
+            linhas = [
+                "Opções do Jogo",
+                "",
+                "Som: Ligado",
+                "Dificuldade: Normal",
+                "",
+                "Pressione ESC para voltar",
+            ]
 
-                fonte = pygame.font.SysFont("Arial", 30)
-                texto = fonte.render(nome_digitado, True, PRETO)
-                tela.blit(texto, (rect_caixa.x + 5, rect_caixa.y + 5))
+            y = 50
+            for linha in linhas:
+                txt = fonte_op.render(linha, True, BRANCO)
+                tela.blit(txt, (LARGURA // 2 - txt.get_width() // 2, y))
+                y += 35
 
-                # cursor piscando
-                tempo_cursor += 1
-                if tempo_cursor >= 30:
-                    cursor_visivel = not cursor_visivel
-                    tempo_cursor = 0
+        # ---------------- TELA DE CREDITOS ----------------
+        elif em_creditos:
+            fonte_op = pygame.font.SysFont("Arial", 22)
+            fonte_maior = pygame.font.SysFont("Arial", 35)
+            
+            
+            #fotinhas
+            pygame.draw.rect(tela, AMARELO, (97, 53, 156, 156))
+            tela.blit(imagem_marjorie, (100, 56))
+            pygame.draw.rect(tela, AMARELO, (397, 53, 156, 156))
+            tela.blit(imagem_debora, (400, 56))
+            pygame.draw.rect(tela, AMARELO, (250, 253, 156, 156))
+            tela.blit(imagem_murilo, (253, 256))
+            
+            
+            #textos
+            texto = fonte_maior.render("CRÉDITOS", True, BRANCO)
+            tela.blit(texto, (255, 5))
+            
+            texto = fonte_op.render("Marjorie", True, BRANCO)
+            tela.blit(texto, (135, 208))
+            texto = fonte_op.render("Desenvolvedora", True, CINZA_CLARINHO)
+            tela.blit(texto, (103, 233))
+            
+            texto = fonte_op.render("Débora", True, BRANCO)
+            tela.blit(texto, (442, 208))
+            texto = fonte_op.render("Desenvolvedora", True, CINZA_CLARINHO)
+            tela.blit(texto, (408, 233))
+            
+            texto = fonte_op.render("Murilo", True, BRANCO)
+            tela.blit(texto, (300, 410))
+            texto = fonte_op.render("Designer/artista", True, CINZA_CLARINHO)
+            tela.blit(texto, (265, 435))
 
-                if cursor_visivel:
-                    cursor_x = rect_caixa.x + 5 + texto.get_width()
-                    pygame.draw.line(
-                        tela, PRETO,
-                        (cursor_x, rect_caixa.y + 5),
-                        (cursor_x, rect_caixa.y + 35),
-                        2
-                    )
 
-                texto = fonte.render("ENTER para continuar", True, BRANCO)
-                tela.blit(texto, (195, 300))
-
-                pygame.display.flip()
-                continue
-
-            # ---------------- TELA DE SELEÇÃO ----------------
-            if not confirmado:
-                tela.fill((50, 50, 100))
-                tela.blit(fundo_selecionar, (0, 0))
-
-                fonte = pygame.font.SysFont("Arial", 50)
-                texto = fonte.render("Escolha um personagem", True, BRANCO)
-                tela.blit(texto, (115, 100))
-
-                for i, p in enumerate(personagens):
-                    if p.rect.collidepoint(mouse_pos):
-                        selecionado = i
-                        if mouse_click:
-                            escolhido = p
-                            game.personagem_escolhido = p
-                            confirmado = True
-
-                    p.desenhar(tela, i == selecionado)
-
-            # ---------------- TELA PERSONAGEM ----------------
-            else:
-                tela.blit(fundo_selecionar, (0, 0))
-
-                pygame.draw.circle(tela, BRANCO, (340, 200), 100)
-
-                rect = escolhido.image.get_rect(center=(340, 200))
-                tela.blit(escolhido.image, rect)
-
-                fonte = pygame.font.SysFont("Arial", 40)
-                fonte2 = pygame.font.SysFont("Arial", 20)
-
-                texto = fonte.render("Personagem selecionado", True, VERDE_CLARO)
-                tela.blit(texto, (170, 30))
-
-                texto = fonte.render("Pressione ENTER para continuar", True, BRANCO)
-                tela.blit(texto, (120, 350))
-
-                texto = fonte2.render("Pressione ESC para voltar ao menu", True, BRANCO)
-                tela.blit(texto, (190, 395))
-
-            pygame.display.flip()
+        pygame.display.flip()
