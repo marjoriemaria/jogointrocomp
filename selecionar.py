@@ -102,7 +102,13 @@ class Selecionar:
                     )
 
                 texto = fonte.render("ENTER para continuar", True, BRANCO)
-                tela.blit(texto, (195, 300))
+                tela.blit(texto, (195, 260))
+                
+                
+                texto = fonte.render("Durante a Batalha  pressione ENTER para iniciar ", True, CINZA_CLARINHO)
+                tela.blit(texto, (75, 350))
+                texto = fonte.render("a ação, e selecione o inimigo com as setas", True, CINZA_CLARINHO)
+                tela.blit(texto, (95, 400))
 
                 pygame.display.flip()
                 continue
