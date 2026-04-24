@@ -31,6 +31,7 @@ class Selecionar:
                         elif evento.key == pygame.K_RETURN:
                             if nome_digitado.strip() != "":
                                 escolhido.nome = nome_digitado
+                                game.nome_jogador = nome_digitado
                                 return "batalha"
 
                         else:
