@@ -78,16 +78,22 @@ class CenaBatalha:
 
                         elif self.estado == "alvo":
 
+                            inimigos_vivos = [i for i in self.inimigos if i.esta_vivo()]
+                            
+                            if self.alvo_index >= len(inimigos_vivos):
+                                self.alvo_index = 0
+                            
                             if event.key == pygame.K_RIGHT:
-                                self.alvo_index = (self.alvo_index + 1) % len(self.inimigos)
+                                self.alvo_index = (self.alvo_index + 1) % len(inimigos_vivos)
 
                             if event.key == pygame.K_LEFT:
-                                self.alvo_index = (self.alvo_index - 1) % len(self.inimigos)
-
+                                self.alvo_index = (self.alvo_index - 1) % len(inimigos_vivos)
+                            
                             if event.key == pygame.K_RETURN:
-                                alvo = self.inimigos[self.alvo_index]
+                                alvo = inimigos_vivos[self.alvo_index]
                                 if alvo.esta_vivo():
                                     self.atacar(self.personagem_atual, alvo)
+                                    
 
             self.desenhar(tela)
             resultado = self.update()
@@ -220,10 +226,11 @@ class CenaBatalha:
                 texto_vida = fonte_pequena.render(f"{inimigo.vida}/{inimigo.vida_max}",True,(255, 255, 255))
                 tela.blit(texto_vida, (323, 50 + i*120))
 
-        for i, inimigo in enumerate(self.inimigos):
-            if inimigo.vida > 0:
-                if self.estado == "alvo" and i == self.alvo_index:
-                    pygame.draw.rect(tela, (255,255,0), inimigo.rect, 3)
+        inimigos_vivos = [i for i in self.inimigos if i.esta_vivo()]
+
+        for i, inimigo in enumerate(inimigos_vivos):
+            if self.estado == "alvo" and i == self.alvo_index:
+                pygame.draw.rect(tela, (255,255,0), inimigo.rect, 3)
 
 
 class CenaFinal:
@@ -231,6 +238,7 @@ class CenaFinal:
         self.game = game
         self.resultado = resultado
         self.time_aliado = time_aliado
+        self.nome = getattr(game, "nome_jogador", "Jogador")
         self.fonte_titulo = pygame.font.SysFont("Arial", 60)
         self.fonte_texto = pygame.font.SysFont("Arial", 24)
 
@@ -265,12 +273,16 @@ class CenaFinal:
         if self.resultado == "VITORIA":
             cor = (0,255,0)
             titulo = "VOCÊ VENCEU"
+            mensagem = f"Parabéns, {self.nome}!"
         else:
             cor = (255,0,0)
             titulo = "VOCÊ PERDEU"
-
-        txt_titulo = self.fonte_titulo.render(titulo, True, cor)
-        tela.blit(txt_titulo, txt_titulo.get_rect(center=(LARGURA//2, ALTURA//2 - 100)))
+            mensagem = f"{self.nome}, você perdeu!"
+            txt_titulo = self.fonte_titulo.render(titulo, True, cor)
+            tela.blit(txt_titulo, txt_titulo.get_rect(center=(LARGURA//2, ALTURA//2 - 100)))
+            
+        txt_msg = self.fonte_texto.render(mensagem, True, (255,255,255))
+        tela.blit(txt_msg, txt_msg.get_rect(center=(LARGURA//2, ALTURA//2 - 40)))
 
         instrucoes = [
             "S - Sair",
