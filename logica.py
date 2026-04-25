@@ -4,8 +4,8 @@ def calcular_dano(atacante, alvo):
 
 
 def aplicar_dano(atacante, alvo):
-    dano = calcular_dano(atacante, alvo)
-    alvo.receber_dano(dano)
+    dano = max(0, atacante.ataque - alvo.defesa)
+    alvo.receber_dano(dano) 
     return dano
 
 
