@@ -15,6 +15,9 @@ class Personagem(pygame.sprite.Sprite):
         self.image = imagem
         self.rect = self.image.get_rect(topleft=(x, y))
 
+        
+        self.tempo_dano = 0
+
     @property
     def defesa(self):
         if self.defendendo:
@@ -22,12 +25,17 @@ class Personagem(pygame.sprite.Sprite):
         return self.defesa_base
 
     def desenhar(self, tela, selecionado=False):
-        tela.blit(self.image, self.rect)
+        imagem = self.image.copy()
+
+        
+        if self.tempo_dano > 0:
+            imagem.fill((255, 0, 0), special_flags=pygame.BLEND_RGB_ADD)
+            self.tempo_dano -= 1
+
+        tela.blit(imagem, self.rect)
 
         if selecionado:
             pygame.draw.rect(tela, (255,255,0), self.rect, 5)
-
-        
 
     def set_posicao(self, x, y):
         self.rect.center = (x, y)
@@ -36,6 +44,9 @@ class Personagem(pygame.sprite.Sprite):
         self.vida -= dano
         if self.vida < 0:
             self.vida = 0
+
+        
+        self.tempo_dano = 10
 
     def esta_vivo(self):
         return self.vida > 0
@@ -59,14 +70,17 @@ class Personagem(pygame.sprite.Sprite):
 
         pygame.draw.rect(tela, (255, 0, 0), (x, y, largura_total, altura))
         pygame.draw.rect(tela, (0, 255, 0), (x, y, largura_atual, altura))
+
     def resetar(self):
         self.vida = self.vida_max
         self.defendendo = False
+        self.tempo_dano = 0
+
 
 # personagens jogáveis
 personagens = [
-    Personagem("Personagem 1", 200, 150, 5, 10, 160, 160, pygame.image.load("imagens/personagem 1.png")),
-    Personagem("Personagem 2", 200, 150, 5, 8, 380, 160, pygame.image.load("imagens/personagem 2.png"))
+    Personagem("Vovô", 200, 100, 10, 10, 160, 160, pygame.image.load("imagens/personagem 1.png")),
+    Personagem("Vovó", 200, 100, 10, 8, 380, 160, pygame.image.load("imagens/personagem 2.png"))
 ]
 
 # inimigos
