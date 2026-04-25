@@ -18,9 +18,9 @@ class CenaBatalha:
     
         self.inimigos = []
 
-        self.inimigo1 = Personagem("Capanga 1", 100, 10, 4, 10, 410, 30, img_reduzida_1)
-        self.inimigo2 = Personagem("Capanga 2", 120, 10, 4, 10, 410, 300, img_reduzida_1)
-        self.inimigo = Personagem("Chefe", 150, 15, 5, 10, 350, 180, img_reduzida_3)
+        self.inimigo1 = Personagem("Capanga 1", 100, 20, 6, 10, 410, 30, img_reduzida_1)
+        self.inimigo2 = Personagem("Capanga 2", 120, 20, 6, 10, 410, 300, img_reduzida_1)
+        self.inimigo = Personagem("Chefe", 150, 40, 8, 10, 350, 180, img_reduzida_3)
         
         self.inimigos.append(self.inimigo1)
         self.inimigos.append(self.inimigo)
@@ -35,6 +35,7 @@ class CenaBatalha:
             self.aliados + self.inimigos,
             key=lambda p: (-p.velocidade, p.defesa_base)
         )
+
         if self.jogador in self.turnos:
             self.turnos.remove(self.jogador)
             self.turnos.insert(0, self.jogador)
@@ -63,15 +64,24 @@ class CenaBatalha:
                     exit()
 
                 if event.type == pygame.KEYDOWN:
+
+                    # ESC
                     if event.key == pygame.K_ESCAPE:
-                        return "menu"
+                        if self.estado == "alvo":
+                            self.estado = "acao"
+                        else:
+                            return "menu"
 
                     if self.personagem_atual in self.aliados:
 
-                        if event.key == pygame.K_d:
+                        # defender
+                        if event.key == pygame.K_d and self.estado == "acao":
                             self.personagem_atual.defendendo = True
                             self.proximo_turno()
 
+                        # =========================
+                        # CONTROLE DE AÇÃO
+                        # =========================
                         if self.estado == "acao":
                             if event.key == pygame.K_RETURN:
                                 self.estado = "alvo"
@@ -79,21 +89,22 @@ class CenaBatalha:
                         elif self.estado == "alvo":
 
                             inimigos_vivos = [i for i in self.inimigos if i.esta_vivo()]
-                            
-                            if self.alvo_index >= len(inimigos_vivos):
-                                self.alvo_index = 0
-                            
+
+                            if not inimigos_vivos:
+                                continue
+
+                            self.alvo_index %= len(inimigos_vivos)
+
                             if event.key == pygame.K_RIGHT:
                                 self.alvo_index = (self.alvo_index + 1) % len(inimigos_vivos)
 
-                            if event.key == pygame.K_LEFT:
+                            elif event.key == pygame.K_LEFT:
                                 self.alvo_index = (self.alvo_index - 1) % len(inimigos_vivos)
-                            
-                            if event.key == pygame.K_RETURN:
+
+                            elif event.key == pygame.K_RETURN:
                                 alvo = inimigos_vivos[self.alvo_index]
-                                if alvo.esta_vivo():
-                                    self.atacar(self.personagem_atual, alvo)
-                                    
+                                self.atacar(self.personagem_atual, alvo)
+                                self.estado = "acao"
 
             self.desenhar(tela)
             resultado = self.update()
@@ -111,7 +122,6 @@ class CenaBatalha:
         self.alvo = alvo
         self.tempo_animacao = 0
         
-        
     def proximo_turno(self):
         while True:
             self.indice_turno += 1
@@ -122,12 +132,9 @@ class CenaBatalha:
 
         self.estado = "acao"
         self.alvo_index = 0
-
-       
         self.personagem_atual.defendendo = False
 
     def update(self):
-        
         resultado = verificar_vitoria(self.aliados, self.inimigos)
         if resultado:
             return resultado
@@ -156,7 +163,6 @@ class CenaBatalha:
 
             return None  
 
-        # turno do inimigo
         if self.personagem_atual in self.inimigos:
             vivos = [a for a in self.aliados if a.esta_vivo()]
 
@@ -189,7 +195,6 @@ class CenaBatalha:
         pygame.draw.rect(tela, (0, 255, 0), (x, y, largura_atual, altura))
         
     def desenhar(self, tela):
-        
         tela.blit(self.fundo, (0, 0))
 
         if self.jogador:
@@ -200,13 +205,18 @@ class CenaBatalha:
                 inimigo.desenhar(tela)
             else:
                 imagem_cinza = inimigo.image.copy()
-                imagem_cinza.fill((100,100,100), special_flags=pygame.BLEND_RGB_MULT)
+                imagem_cinza.fill((180,180,180), special_flags=pygame.BLEND_RGB_MULT)
                 tela.blit(imagem_cinza, inimigo.rect)
 
+        # TEXTO DINÂMICO
         if self.personagem_atual in self.aliados:
-            texto = self.fonte.render("Seu turno: ENTER atacar | D defender", True, (255,255,255))
+            if self.estado == "acao":
+                texto = self.fonte.render("ENTER atacar | D defender", True, (255,255,255))
+            else:
+                texto = self.fonte.render("← → escolher | ENTER confirmar | ESC voltar", True, (255,255,255))
         else:
             texto = self.fonte.render("Turno do inimigo...", True, (255,255,255))
+
         tela.blit(texto, (20, 420))
 
         x = self.jogador.rect.centerx - 30
@@ -231,7 +241,6 @@ class CenaBatalha:
         for i, inimigo in enumerate(inimigos_vivos):
             if self.estado == "alvo" and i == self.alvo_index:
                 pygame.draw.rect(tela, (255,255,0), inimigo.rect, 3)
-
 
 class CenaFinal:
     def __init__(self, game, resultado, time_aliado):
@@ -274,6 +283,9 @@ class CenaFinal:
             cor = (0,255,0)
             titulo = "VOCÊ VENCEU"
             mensagem = f"Parabéns, {self.nome}!"
+            txt_titulo = self.fonte_titulo.render(titulo, True, cor)
+            tela.blit(txt_titulo, txt_titulo.get_rect(center=(LARGURA//2, ALTURA//2 - 100)))
+            
         else:
             cor = (255,0,0)
             titulo = "VOCÊ PERDEU"
