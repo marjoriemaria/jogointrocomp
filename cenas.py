@@ -277,9 +277,14 @@ class CenaFinal:
             pygame.display.flip()
 
     def draw(self, tela):
-        tela.fill((0,0,0))
+        
+        Fundo_vitoria = pygame.image.load("imagens/Vitória.jpeg")
+        Fundo_derrota = pygame.image.load("imagens/Derrota.jpeg")
+
+
 
         if self.resultado == "VITORIA":
+            tela.blit(Fundo_vitoria, (0, 0))
             cor = (0,255,0)
             titulo = "VOCÊ VENCEU"
             mensagem = f"Parabéns, {self.nome}!"
@@ -287,6 +292,7 @@ class CenaFinal:
             tela.blit(txt_titulo, txt_titulo.get_rect(center=(LARGURA//2, ALTURA//2 - 100)))
             
         else:
+            tela.blit(Fundo_derrota, (0, 0))
             cor = (255,0,0)
             titulo = "VOCÊ PERDEU"
             mensagem = f"{self.nome}, você perdeu!"
